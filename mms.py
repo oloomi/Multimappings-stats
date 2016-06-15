@@ -13,4 +13,4 @@ args = parser.parse_args()
 
 if args.input:
     read_cigar_dict = multi_mapping_stats(args.input, args.output)
-    find_annotation(read_cigar_dict, "oti-test.gb", "genbank")
+    find_annotation(read_cigar_dict, "oti.gb", "genbank")

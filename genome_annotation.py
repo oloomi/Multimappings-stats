@@ -23,20 +23,28 @@ def find_annotation(read_cigar_dict, annotation_file, file_format='genbank'):
                     # for each position, create a list of read alignments to that location
                     position_cigar[position].append(cigar)
 
-    print(position_cigar)
+
+    # print(position_cigar)
 
     # All locations on the genome which have a multi-read mapped to
     sorted_positions = sorted(position_cigar.keys())
 
-    # record = SeqIO.read("NC_005816.fna", "fasta")
-    record = SeqIO.read(annotation_file, file_format)
+
     i = 0
+    out_file = open('ot-annotation.txt', 'w')
+    record = SeqIO.read(annotation_file, file_format)
+    # For each gene, find what multi-reads are in its region, if any
     for feature in record.features:
+        if feature.type == 'source':
+            continue
         # print(feature.location.start, feature.location.end, feature.location.strand)
         cigars_list = []
         while sorted_positions[i] in range(feature.location.start, feature.location.end + 1):
             cigars_list.append((sorted_positions[i], position_cigar[sorted_positions[i]]))
             if i < len(sorted_positions):
                 i += 1
-        print(feature.location.start, cigars_list)
+        if cigars_list:
+            # print(feature.location.start, '-', feature.location.end, feature.type, cigars_list)
+            out_file.write("{}-{} {} {}\n".format(feature.location.start, feature.location.end, feature.type, cigars_list))
+    out_file.close()
 
