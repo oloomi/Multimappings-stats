@@ -58,10 +58,10 @@ def multi_mapping_stats(sam_file_path, output_file_path):
                   '\t{}\t{:.2%}\n'.format(same_multi_reads, same_multi_reads / total_reads)
     output_str += '- More than one location, with different alignments:' + \
                   '\t{}\t{:.2%}\n'.format(diff_multi_reads, diff_multi_reads / total_reads)
-    output_str += 'Number of reads that did not map to any location:\t{}\t{:.2%}\n'.format(not_mapped_reads,\
+    output_str += 'Number of reads that did not map to any location:\t{}\t{:.2%}\n'.format(not_mapped_reads,
                                                                                            not_mapped_reads / total_reads)
     output_str += 'Total number of reads:\t{}\t{:.2%}\n'.format(total_reads, total_reads / total_reads)
-    output_str += 'Total number of mapped reads:\t{}\t{:.2%}\n'.format(total_mapped_reads,\
+    output_str += 'Total number of mapped reads:\t{}\t{:.2%}\n'.format(total_mapped_reads,
                                                                        total_mapped_reads / total_reads)
 
     with open(output_file_path, 'w') as stats_file:
