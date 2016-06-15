@@ -1,11 +1,42 @@
+__author__ = 'soloomi'
+
 # import Bio
 from Bio import SeqIO, SeqFeature
+from collections import defaultdict
 
-def read_annotation(annot_file, file_format='genbank'):
+def find_annotation(read_cigar_dict, annotation_file, file_format='genbank'):
+    """
+    Finds the annotation for the locations on the genome where multi-reads map to
+    :param read_cigar_dict: a nested dictionary like: {read_id: {CIGAR: [list of mapping positions]}
+    :param annotation_file: the path to the reference genome annotation file
+    :param file_format: the format of annotation file: 'genbank' or 'fasta'
+    """
+    position_cigar = defaultdict(list)
+    for read_id, cigar_dict in read_cigar_dict.items():
+        # if this read has only one CIGAR and has aligned only once; it's a unique read
+        if len(cigar_dict) == 1 and len(cigar_dict.values()) == 1:
+            # it's not a multi-read
+            pass
+        else:
+            for cigar, positions_list in cigar_dict.items():
+                for position in positions_list:
+                    # for each position, create a list of read alignments to that location
+                    position_cigar[position].append(cigar)
+
+    print(position_cigar)
+
+    # All locations on the genome which have a multi-read mapped to
+    sorted_positions = sorted(position_cigar.keys())
+
     # record = SeqIO.read("NC_005816.fna", "fasta")
-    record = SeqIO.read(annot_file, file_format)
+    record = SeqIO.read(annotation_file, file_format)
+    i = 0
     for feature in record.features:
-        print(feature.location.start, feature.location.end, feature.location.strand)
+        # print(feature.location.start, feature.location.end, feature.location.strand)
+        cigars_list = []
+        while sorted_positions[i] in range(feature.location.start, feature.location.end + 1):
+            cigars_list.append((sorted_positions[i], position_cigar[sorted_positions[i]]))
+            if i < len(sorted_positions):
+                i += 1
+        print(feature.location.start, cigars_list)
 
-
-read_annotation("oti.gb", "genbank")

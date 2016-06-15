@@ -1,7 +1,8 @@
 __author__ = 'soloomi'
 
 import argparse
-import multi_mapping_stats
+from multi_mappings_statistics import *
+from genome_annotation import *
 
 # Getting command line arguments
 parser = argparse.ArgumentParser('Finds multi-mapping statistics')
@@ -11,4 +12,5 @@ parser.add_argument('-o', '--output', default='output.txt',
 args = parser.parse_args()
 
 if args.input:
-    multi_mapping_stats(args.input, args.output)
+    read_cigar_dict = multi_mapping_stats(args.input, args.output)
+    find_annotation(read_cigar_dict, "oti-test.gb", "genbank")

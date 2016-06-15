@@ -6,6 +6,7 @@ from collections import defaultdict
 def multi_mapping_stats(sam_file_path, output_file_path):
     # A nested dictionary like: {read_id: {CIGAR: [list of mapping positions]}
     read_cigar_dict = defaultdict(lambda: defaultdict(list))
+
     not_mapped_reads = 0  # Number of reads that are not mapped to any location
 
     with open(sam_file_path) as sam_file:
@@ -67,4 +68,4 @@ def multi_mapping_stats(sam_file_path, output_file_path):
         stats_file.write(output_str)
     print(output_str)
 
-
+    return read_cigar_dict
