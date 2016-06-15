@@ -40,11 +40,12 @@ def multi_mapping_stats(sam_file_path, output_file_path):
         # if this read has only one CIGAR
         if len(cigar_dict) == 1:
             # if it has repeated only once, that's a read which maps only to one location
-            if len(cigar_dict.values()) == 1:
-                unique_reads += 1
-            # Otherwise, it maps to more than one location, but with the same alignment
-            else:
-                same_multi_reads += 1
+            for cigar in cigar_dict:  # it has only one key (CIGAR)
+                if len(cigar_dict[cigar]) == 1:  # list of mapping positions
+                    unique_reads += 1
+                # Otherwise, it maps to more than one location, but with the same alignment
+                else:
+                    same_multi_reads += 1
         else:
             diff_multi_reads += 1
 
