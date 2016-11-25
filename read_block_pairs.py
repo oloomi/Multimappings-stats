@@ -4,7 +4,7 @@ from collections import defaultdict
 from itertools import combinations
 
 
-def read_pairs(sam_file_path, output_file_path):
+def read_pairs(sam_file_path, output_file_path, block_size):
     # A dictionary like: {read_id: [list of mapping positions]}
     read_position_dict = defaultdict(list)
 
@@ -28,14 +28,14 @@ def read_pairs(sam_file_path, output_file_path):
             else:
                 not_mapped_reads += 1
 
-    # We partition genome to blocks of size 100 bp and we find which block(s) a read maps to
+    # We partition genome to blocks of size block_size (e.g. 100) bp and we find which block(s) a read maps to
     read_block_dict = defaultdict(list)
     for read, pos_list in read_position_dict.items():
         # if a read maps to multiple positions
         if len(pos_list) > 1:
             for pos in pos_list:
                 # It only belongs to one block eg. [101,199] that is block no. 2
-                block_no = pos // 100 + 1
+                block_no = pos // block_size + 1
                 read_block_dict[read].append(block_no)
                 # if pos % 100 == 1:
                 #     read_block_dict[read].append(block_no)
