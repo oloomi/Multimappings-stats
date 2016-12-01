@@ -3,6 +3,7 @@ __author__ = 'soloomi'
 import argparse
 from multi_mappings_statistics import *
 from read_block_pairs import *
+from merge_blocks import *
 #from genome_annotation import *
 
 # Getting command line arguments
@@ -16,5 +17,8 @@ from read_block_pairs import *
 #     read_cigar_dict = multi_mapping_stats(args.input, args.output)
     # find_annotation(read_cigar_dict, "oti.gb", "genbank")
     # find_annotation(read_cigar_dict, "oti.gb", "genbank")
-read_pairs('E:\Codes\data\mtb-single-mapping-report-all.sam', 'block-pairs-mtb-single-10000bp.txt', 10000)
-read_pairs('E:\Codes\data\ot-single-mapping-report-all.sam', 'block-pairs-ot-single-10000bp.txt', 10000)
+
+# read_pairs('E:\Codes\data\mtb-single-mapping-report-all.sam', 'block-pairs-mtb-single-10000bp.txt', 10000)
+# read_pairs('E:\Codes\data\ot-single-mapping-report-all.sam', 'block-pairs-ot-single-10000bp.txt', 10000)
+
+merge_blocks('block-pairs-mtb-single.txt')
