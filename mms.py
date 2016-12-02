@@ -21,4 +21,4 @@ from merge_blocks import *
 # read_pairs('E:\Codes\data\mtb-single-mapping-report-all.sam', 'block-pairs-mtb-single-10000bp.txt', 10000)
 # read_pairs('E:\Codes\data\ot-single-mapping-report-all.sam', 'block-pairs-ot-single-10000bp.txt', 10000)
 
-merge_blocks('block-pairs-mtb-single.txt')
+merge_blocks('block-pairs-sample.txt', 'block-pairs-merged.txt')
