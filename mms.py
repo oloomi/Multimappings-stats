@@ -5,6 +5,7 @@ from multi_mappings_statistics import *
 from read_block_pairs import *
 from merge_blocks import *
 #from genome_annotation import *
+from compare_mappings import compare_mappings
 
 # Getting command line arguments
 # parser = argparse.ArgumentParser('Finds multi-mapping statistics')
@@ -21,4 +22,6 @@ from merge_blocks import *
 # read_pairs('E:\Codes\data\mtb-single-mapping-report-all.sam', 'block-pairs-mtb-single-10000bp.txt', 10000)
 # read_pairs('E:\Codes\data\ot-single-mapping-report-all.sam', 'block-pairs-ot-single-10000bp.txt', 10000)
 
-merge_blocks('block-pairs-sample.txt', 'block-pairs-merged.txt')
+merge_blocks('block-pairs-sample-input.txt', 'block-pairs-sample-output.txt')
+
+
