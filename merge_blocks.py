@@ -56,6 +56,7 @@ def merge_blocks_pairs(infile_path, outfile_path):
     # [[1, 1, 16, 17], [1, 1, 55, 56]],
     # [[2, 2, 17, 18], [2, 2, 56, 56]]
     # ]
+    results = []
     prev = pairs_lst[0]
     list_index = 1
     while list_index < len(pairs_lst):
@@ -70,21 +71,30 @@ def merge_blocks_pairs(infile_path, outfile_path):
                 if prev_end <= curr_start <= prev_end + 1:
                     # print(prev[j][0], curr[i][1], prev_start, curr_end)
                     curr[i] = [prev[j][0], curr[i][1], prev_start, curr_end]
+                    if results: results[-1].pop(j)
                     i += 1
                     j += 1
                 elif prev_start <= curr_end <= prev_start + 1:
                     # print(prev[j][0], curr[i][1], curr_start, prev_end)
                     curr[i] = [prev[j][0], curr[i][1], prev_start, curr_end]
+                    if results: results[-1].pop(j)
                     i += 1
                     j += 1
                 else:
                     i += 1
-            print(curr)
+            # print(curr)
+            results.append(curr)
         else:
-            print(curr)
+            # print(curr)
+            results.append(curr)
 
         prev = curr
         list_index += 1
+
+    print("Merged ranges: ")
+    for lst in results:
+        if lst:
+            print(lst)
 
 
 
@@ -148,3 +158,4 @@ def findAliases(xs):
 #     print(v)
 
 merge_blocks_pairs('sample-blocks.txt', 'output.txt')
+# merge_blocks_pairs('sample-blocks-2.txt', 'output.txt')
