@@ -30,6 +30,14 @@ def merge_blocks(infile_path, outfile_path):
 
     return True
 
+def merge_ranges(range_a, range_b):
+    (start_a, end_a) = range_a
+    (start_b, end_b) = range_b
+    #       [A](B) or [A (B ] )                   (B) [A] or (B [A ) ]
+    if start_a <= start_b <= end_a + 1 or start_b <= start_a <= end_b + 1:
+        return (min(start_a, start_b), max(end_a, end_b))
+    else:
+        return None
 
 def merge_blocks_pairs(infile_path, outfile_path):
     # A semi-merged list of block pairs
@@ -54,7 +62,7 @@ def merge_blocks_pairs(infile_path, outfile_path):
     print(pairs_lst)
     # [
     # [[1, 1, 16, 17], [1, 1, 55, 56]],
-    # [[2, 2, 17, 18], [2, 2, 56, 56]]
+    # [[2, 2, 18, 19], [2, 2, 56, 56]]
     # ]
     results = []
     prev = pairs_lst[0]
@@ -64,19 +72,15 @@ def merge_blocks_pairs(infile_path, outfile_path):
         i = 0
         j = 0
         #
-        if curr[0][0] == prev[0][1] + 1:
+        if prev[0][1] <= curr[0][0] <= prev[0][1] + 1:
             while i < len(curr) and j < len(prev):
-                (prev_start, prev_end) = (prev[j][2], prev[j][3])
-                (curr_start, curr_end) = (curr[i][2], curr[i][3])
-                if prev_end <= curr_start <= prev_end + 1:
-                    # print(prev[j][0], curr[i][1], prev_start, curr_end)
-                    curr[i] = [prev[j][0], curr[i][1], prev_start, curr_end]
-                    if results: results[-1].pop(j)
-                    i += 1
-                    j += 1
-                elif prev_start <= curr_end <= prev_start + 1:
-                    # print(prev[j][0], curr[i][1], curr_start, prev_end)
-                    curr[i] = [prev[j][0], curr[i][1], prev_start, curr_end]
+                # (prev_start, prev_end)
+                prev_range = (prev[j][2], prev[j][3])   # (16, 17)
+                # (curr_start, curr_end)
+                curr_range = (curr[i][2], curr[i][3])   # (18, 19)
+                merged_range = merge_ranges(prev_range, curr_range)
+                if merged_range:
+                    curr[i] = [prev[j][0], curr[i][1], merged_range[0], merged_range[1]]    # [1, 2, 16, 19]
                     if results: results[-1].pop(j)
                     i += 1
                     j += 1
@@ -92,58 +96,61 @@ def merge_blocks_pairs(infile_path, outfile_path):
         list_index += 1
 
     print("Merged ranges: ")
-    for lst in results:
-        if lst:
-            print(lst)
+    with open(outfile_path, 'w') as outfile:
+        for lst in results:
+            for pair in lst:
+                print("{}-{}\t{}-{}".format(pair[0], pair[1], pair[2], pair[3]))
+                outfile.write("{}-{}\t{}-{}\n".format(pair[0], pair[1], pair[2], pair[3]))
 
 
 
 
 
 
-def group(xys):
-    grp = []
-    for (x, y) in xys:
-        if len(grp) > 0 and grp[0][0] != x:
-            yield grp
-            grp = []
-        grp.append((x, y))
-    if len(grp) > 0:
-        yield grp
 
-def findAliases(xs):
-    live = []
-    for grp in group(xs):
-        x = grp[0][0]
-        keep = []
-        used = set([])
-        for v in live:
-            if v[0] != x and v[0] + 1 != x:
-                yield v
-                continue
-            found = False
-            for i in range(len(grp)):
-                if i in used:
-                    continue
-                blk = grp[i]
-                y = blk[1]
-                if v[1] == y or v[1] + 1 == y:
-                    used.add(i)
-                    v[0] = x
-                    v[1] = y
-                    keep.append(v)
-                    found = True
-                    break
-            if not found:
-                yield v
-        live = keep
-        for i in range(len(grp)):
-            if i in used:
-                continue
-            y = grp[i][1]
-            live.append([x, y, x, y, None])
-    for v in live:
-        yield v
+# def group(xys):
+#     grp = []
+#     for (x, y) in xys:
+#         if len(grp) > 0 and grp[0][0] != x:
+#             yield grp
+#             grp = []
+#         grp.append((x, y))
+#     if len(grp) > 0:
+#         yield grp
+#
+# def findAliases(xs):
+#     live = []
+#     for grp in group(xs):
+#         x = grp[0][0]
+#         keep = []
+#         used = set([])
+#         for v in live:
+#             if v[0] != x and v[0] + 1 != x:
+#                 yield v
+#                 continue
+#             found = False
+#             for i in range(len(grp)):
+#                 if i in used:
+#                     continue
+#                 blk = grp[i]
+#                 y = blk[1]
+#                 if v[1] == y or v[1] + 1 == y:
+#                     used.add(i)
+#                     v[0] = x
+#                     v[1] = y
+#                     keep.append(v)
+#                     found = True
+#                     break
+#             if not found:
+#                 yield v
+#         live = keep
+#         for i in range(len(grp)):
+#             if i in used:
+#                 continue
+#             y = grp[i][1]
+#             live.append([x, y, x, y, None])
+#     for v in live:
+#         yield v
 
 # xs = []
 # for l in sys.stdin:
@@ -158,4 +165,5 @@ def findAliases(xs):
 #     print(v)
 
 merge_blocks_pairs('sample-blocks.txt', 'output.txt')
-# merge_blocks_pairs('sample-blocks-2.txt', 'output.txt')
+merge_blocks_pairs('sample-blocks-2.txt', 'sample-blocks-2-output.txt')
+# merge_blocks_pairs('block-pairs-mtb-single.txt', 'mtb-merged-output.txt')
