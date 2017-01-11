@@ -64,8 +64,9 @@ def merge_blocks_pairs(infile_path, outfile_path):
     # [[1, 1, 16, 17], [1, 1, 55, 56]],
     # [[2, 2, 18, 19], [2, 2, 56, 56]]
     # ]
-    results = []
+
     prev = pairs_lst[0]
+    results = [prev[:]]
     list_index = 1
     while list_index < len(pairs_lst):
         curr = pairs_lst[list_index]
@@ -73,20 +74,72 @@ def merge_blocks_pairs(infile_path, outfile_path):
         j = 0
         #
         if prev[0][1] <= curr[0][0] <= prev[0][1] + 1:
-            while i < len(curr) and j < len(prev):
-                # (prev_start, prev_end)
-                prev_range = (prev[j][2], prev[j][3])   # (16, 17)
-                # (curr_start, curr_end)
-                curr_range = (curr[i][2], curr[i][3])   # (18, 19)
-                merged_range = merge_ranges(prev_range, curr_range)
-                if merged_range:
-                    curr[i] = [prev[j][0], curr[i][1], merged_range[0], merged_range[1]]    # [1, 2, 16, 19]
-                    if results: results[-1].pop(j)
-                    i += 1
-                    j += 1
-                else:
-                    i += 1
+            used_prevs = []
+            # For each item in curr list:
+            while i < len(curr):
+                j = 0
+                # Check it against each item in prev list to see if they can be merged together
+                while j < len(prev):
+                    if j in used_prevs:
+                        j += 1
+                        continue
+                    # (prev_start, prev_end)
+                    prev_range = (prev[j][2], prev[j][3])   # (16, 17)
+                    # (curr_start, curr_end)
+                    curr_range = (curr[i][2], curr[i][3])   # (18, 19)
+
+                    merged_range = merge_ranges(prev_range, curr_range)
+
+                    # If we can merge two ranges:
+                    if merged_range:
+                        # Find the merged range
+                        curr[i] = [min(prev[j][0], curr[i][0]), max(prev[j][1], curr[i][1]),
+                                   merged_range[0], merged_range[1]]    # [1, 2, 16, 19]
+                        # if results:
+                        #     results[-1].pop(j)
+
+                        # Check if the new range can be merged with the previous items in current
+                        while i > 0:
+                            last_item = curr[i-1]
+                            merged_with_last_item = merge_ranges((last_item[2], last_item[3]), (curr[i][2], curr[i][3]))
+                            if merged_with_last_item:
+                                new_curr_item = [min(last_item[0], curr[i][0]), max(last_item[1], curr[i][1]),
+                                                 merged_with_last_item[0], merged_with_last_item[1]]
+                                curr[i-1] = new_curr_item
+                                curr.pop(i)
+                                i -= 1
+                            else:
+                                break
+
+                        # Check if the new range can be merged with the next items in current
+                        while True:
+                            if i < (len(curr) - 1):
+                                next_item = curr[i+1]
+                                merged_with_next_item = merge_ranges((next_item[2], next_item[3]), (curr[i][2], curr[i][3]))
+                                if merged_with_next_item:
+                                    new_curr_item = [min(next_item[0], curr[i][0]), max(next_item[1], curr[i][1]),
+                                                     merged_with_next_item[0], merged_with_next_item[1]]
+                                    curr[i+1] = new_curr_item
+                                    curr.pop(i)
+                                    if i > 0:
+                                        i -= 1
+                                    else:
+                                        break
+                                else:
+                                    break
+                            else:
+                                break
+
+                        used_prevs.append(j)
+                        break
+                    else:
+                        j += 1
+                i += 1
             # print(curr)
+            if used_prevs:
+                # remove those items from results[-1] i.e. prev that have been merged now with items in current list
+                for lst_index in sorted(used_prevs, reverse=True):
+                    results[-1].pop(lst_index)
             results.append(curr)
         else:
             # print(curr)
@@ -166,4 +219,5 @@ def merge_blocks_pairs(infile_path, outfile_path):
 
 merge_blocks_pairs('sample-blocks.txt', 'output.txt')
 merge_blocks_pairs('sample-blocks-2.txt', 'sample-blocks-2-output.txt')
+merge_blocks_pairs('sample-blocks-3.txt', 'sample-blocks-3-output.txt')
 # merge_blocks_pairs('block-pairs-mtb-single.txt', 'mtb-merged-output.txt')
