@@ -3,6 +3,14 @@ __author__ = 'soloomi'
 from collections import defaultdict
 
 
+def are_alignments_different(alignments):
+    # Check if a multi-read is mapped to different locations with different alignments
+    prev_aln = alignments[0][2]  # the MD:Z field
+    for aln in alignments[1:]:
+        if aln[2] != prev_aln:
+            return True
+    return False
+
 def compare_mappings(benchmark_sam_file_name, mapping_sam_file_name, output_file_name):
     # A dictionary like: {read_id: [list of mappings CIGAR strings]}
     read_alignments_dict = defaultdict(list)
@@ -51,7 +59,8 @@ def compare_mappings(benchmark_sam_file_name, mapping_sam_file_name, output_file
 
                 # * means no alignment for a read
                 if cigar != "*":
-                    if read_id in read_alignments_dict and len(read_alignments_dict[read_id]) > 1:
+                    if read_id in read_alignments_dict and len(read_alignments_dict[read_id]) > 1 and \
+                            are_alignments_different(read_alignments_dict[read_id]):
                         out_file.write("{}\t{}\n".format((pos, cigar), read_alignments_dict[read_id]))
                     # else:
                     #     out_file.write("read not found!\n")
