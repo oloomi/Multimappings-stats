@@ -1,6 +1,7 @@
 __author__ = 'soloomi'
 
 from collections import defaultdict
+import pysam
 
 
 def are_alignments_different(alignments):
@@ -59,13 +60,36 @@ def compare_mappings(benchmark_sam_file_name, mapping_sam_file_name, output_file
 
                 # * means no alignment for a read
                 if cigar != "*":
+                    # If we have a multi-read with different alignments
                     if read_id in read_alignments_dict and len(read_alignments_dict[read_id]) > 1 and \
                             are_alignments_different(read_alignments_dict[read_id]):
                         out_file.write("{}\t{}\n".format((pos, cigar), read_alignments_dict[read_id]))
+                        # For each mapping position
+                        for alignment in read_alignments_dict[read_id]:
+                            (pos, cigar, md_z) = alignment
+
                     # else:
                     #     out_file.write("read not found!\n")
 
 
+def bases_at_pos(file_name):
+    # Opening a BAM file in read mode
+    samfile = pysam.AlignmentFile(file_name, "rb")
+    # iter = samfile.fetch("gi|448814763|ref|NC_000962.3|", 1000, 2000)
+    pileup_iter = samfile.pileup("gi|448814763|ref|NC_000962.3|", 2564751, 2564752)
+    for pileup_col in pileup_iter:
+        if pileup_col.pos == 2564751:
+            print("coverage at base {} = {}".format(pileup_col.pos, pileup_col.n))
+            for pileup_read in pileup_col.pileups:
+                if not pileup_read.is_del and not pileup_read.is_refskip:
+                    print("base in read {} = {}".format(pileup_read.alignment.query_name,
+                                                        pileup_read.alignment.query_sequence[pileup_read.query_position]))
+    samfile.close()
 
-compare_mappings("E:\Codes\data\correct-mapping\mtb.sam",
-                 "E:\Codes\data\correct-mapping\mtb-single-mapping-report-all.sam", "compared-SAM-mtb.txt")
+bases_at_pos("../data/correct-mapping/mtb-single-mapping-report-all-sorted.bam")
+
+# compare_mappings("E:\Codes\data\correct-mapping\mtb.sam",
+#                  "E:\Codes\data\correct-mapping\mtb-single-mapping-report-all.sam", "compared-SAM-mtb.txt")
+
+# compare_mappings("../data/correct-mapping/mtb.sam",
+#                  "../data/correct-mapping/mtb-single-mapping-report-all.sam", "compared-SAM-mtb-linux.txt")
