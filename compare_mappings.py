@@ -1,6 +1,7 @@
 __author__ = 'soloomi'
 
 from collections import defaultdict
+import re
 import pysam
 
 
@@ -76,6 +77,7 @@ def bases_at_pos(file_name):
     # Opening a BAM file in read mode
     samfile = pysam.AlignmentFile(file_name, "rb")
     # iter = samfile.fetch("gi|448814763|ref|NC_000962.3|", 1000, 2000)
+    # GCG
     pileup_iter = samfile.pileup("gi|448814763|ref|NC_000962.3|", 2564751, 2564752)
     for pileup_col in pileup_iter:
         if pileup_col.pos == 2564751:
@@ -86,7 +88,41 @@ def bases_at_pos(file_name):
                                                         pileup_read.alignment.query_sequence[pileup_read.query_position]))
     samfile.close()
 
-bases_at_pos("../data/correct-mapping/mtb-single-mapping-report-all-sorted.bam")
+
+def mdz_parser(mdz_str):
+    """
+    Takes the MD:Z filed string and returns a list of SNP positions and the SNP base
+    :param mdz_str: the string from MD:Z field of the SAM file for a read
+    :return: List of (pos, SNP_base) tuples. Please note that pos is 0-based;
+    therefore, pos 0 points to the first base in the sequence.
+    """
+
+    # 'MD:Z:15A15A9G15C42'
+    # Removing the MD:Z: prefix from the string
+    mdz_str = mdz_str[5:]
+    # Splitting into alphabetical and numerical parts
+    mdz_parsed = filter(None, re.split(r'(\d+)', mdz_str))
+    # mdz_parsed = re.findall(r"[^\W\d_]+|\d+", mdz_str)
+
+    # Return list
+    pos_snps = []
+    pos = 0
+    for item in mdz_parsed:
+        if item.isalpha():
+            for base in item:
+                pos_snps.append((pos, base))
+                pos += 1
+        elif item.isnumeric():
+            pos += int(item)
+        else:
+            print("ERROR: Invalid MD:Z field in SAM file!")
+
+    return pos_snps
+
+
+print(mdz_parser("MD:Z:G15AT15A9G15C42"))
+
+# bases_at_pos("../data/correct-mapping/mtb-single-mapping-report-all-sorted.bam")
 
 # compare_mappings("E:\Codes\data\correct-mapping\mtb.sam",
 #                  "E:\Codes\data\correct-mapping\mtb-single-mapping-report-all.sam", "compared-SAM-mtb.txt")
