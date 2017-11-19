@@ -161,9 +161,3 @@ def merge_blocks_pairs(infile_path, outfile_path):
                 outfile.write("{}-{}\t{}-{}\t{}\n".format(pair[0], pair[1], pair[2], pair[3], pair[4]))
 
     print("Done!")
-
-# merge_blocks_pairs('sample-blocks-1.txt', 'sample-blocks-1-output.txt')
-# merge_blocks_pairs('sample-blocks-2.txt', 'sample-blocks-2-output.txt')
-# merge_blocks_pairs('sample-blocks-3.txt', 'sample-blocks-3-output.txt')
-merge_blocks_pairs('block-pairs-mtb-single.txt', 'merged-block_pairs_single_mtb.txt')
-merge_blocks_pairs('block-pairs-ot-single.txt', 'merged-block_pairs_single_ot.txt')
